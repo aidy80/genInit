@@ -1,0 +1,50 @@
+Program written by Aidan Fike, July 2019
+
+NOTE: To successfully run this program, you will need to
+load modules for chimera64/1.6.2 and a version of gromacs 5 or 2018.
+Alternatively, you can also use gromacs4 (only tested with 4.6.7), 
+but to do so, you must include the -gro4 flag when you run the program. 
+If you already are following these requirements, ignore this note.
+
+USAGE: To use this program run:
+
+    python main.py isRandom name/proteinLength threshold [-gro4]
+
+    Where isRandom is whether or not you want the sequence you are creating to be
+randomly generated. If 'True', you want a random sequence, then the next argument
+should be the number of amino acids in your new sequence. Only (G, A, V, F, S, N, R, D)
+will be used for random sequences. Instead, if isRandom is given as 'False', the next
+argument should be the name of the protein you wish to create. This protein name can 
+be make of any of the 21 common amino acids. 
+    'threshold' is the minimium backbone-aligned rmsd difference allowed between your
+two generated structures. This should be given in units of [nm].
+Lastly, you can run this program with gromacs4 rather than the gromacs5/gromacs2018 default.
+by adding a -gro4 flag after your other command line options.
+
+A couple examples are:
+    For a random 8mer with a minimum rmsd of .19nm created using gromacs4:
+        python main.py True 8 .19 -gro4
+    For a desired sequence, GNSRVGGGGG, with a minimum rmsd of .3nm using gromacs5/2018 you may want to use:
+        python main.py False GNSRVGGGGG .3
+
+PROGRAM DESCRIPTION:
+    This program is made to ease the process of running Be-Meta simulations. 
+    In these simulations, to confirm convergence, it is necessary to run 2 
+    simulations starting with different initial structures. This program automates
+    the process of creating these two initial structures. To do so, once a desired 
+    sequence is chosen, many potential initial structures are created using chimera. 
+    These potential structures have their omega angles measured, and any structures 
+    with cis peptide bonds are removed from consideration. With the remaining non-cis structures, a 
+    backbone-aligned rmsd is then calculated between each pair of structures. The two structures with
+    the largest rmsd are then chosen to be the initial structures.
+
+    This program will begin by creating two random structures and evaluating their rmsd and whether or
+    not they have any cis peptide bonds. Then, if one structure has a cis bond or the backbone rmsd 
+    between the structures is less than the given threshhold, another
+    structure will be created. The process will then repeat, seeing whether the new structure has a
+    cis bond and measuring the pairwise rmsd between it and the other initial structures. Then, if none of
+    the pairwise rmsd values are greater than the threshold, another structure will be created and the
+    process will be repeated. This will occur at most 20 times, at which point the program will
+    quit, and the user will have to rerun the program, usually with a lower threshold rmsd value.
+    This max-tries variable, default 20, can be manually changed at the top of main.py
+
